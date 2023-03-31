@@ -35,6 +35,7 @@ namespace MvcWebApp.Controllers
                                    on u.Id equals ud.UserId
                                    select new UserVM
                                    {
+                                       Id = u.Id,
                                        Name = u.Name,
                                        Email = u.Email,
                                        Address = ud.Address,
@@ -50,6 +51,28 @@ namespace MvcWebApp.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+            var userExist = await _appDbContext.Users.Include(x => x.UsersDetails).FirstOrDefaultAsync(u => u.Id == id);
+            UserVM userDetail = new UserVM
+            {
+                Name = userExist.Name,
+                Email = userExist.Email,
+                City = userExist.UsersDetails.FirstOrDefault().City,
+                Address = userExist.UsersDetails.FirstOrDefault().Address,
+                PhoneNumber = userExist.UsersDetails.FirstOrDefault().PhoneNumber,
+
+            };
+            if(userDetail == null)
+            {
+                return NotFound();
+            }
+            return View(userDetail);
+        }
         public IActionResult SaveData()
         {
             return View();
@@ -83,7 +106,7 @@ namespace MvcWebApp.Controllers
             return View(model);
         }
 
-            [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
