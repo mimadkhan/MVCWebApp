@@ -49,5 +49,7 @@ namespace MvcWebApp.Models
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
         public DbSet<MvcWebApp.Models.UserVM> UserVM { get; set; }
+
+        public DbSet<MvcWebApp.Models.UserViewModel> UserViewModel { get; set; }
     }
 }

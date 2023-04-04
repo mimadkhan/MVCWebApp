@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MvcWebApp.Models;
@@ -14,11 +15,13 @@ namespace MvcWebApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext)
+        public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext, IMapper mapper)
         {
             _logger = logger;
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
         public IActionResult Index()
@@ -26,24 +29,42 @@ namespace MvcWebApp.Controllers
             return View();
         }
 
+        public IActionResult MappingObjects()
+        {
+            // Map List of objects
+            /* List<Users> user = new List<Users>()
+             {
+                 new Users() { Id = 1, FirstName = "Saleem", LastName = "khan", Email = "saleem@yopmail.com", PhoneNumber = "03156446551"},
+                 new Users() { Id = 2, FirstName = "Saqib", LastName = "khan", Email = "saqib@yopmail.com", PhoneNumber = "035866551"},
+                 new Users() { Id = 3, FirstName = "Sajid", LastName = "Khan",Email = "sajid@yopmail.com", PhoneNumber = "031586946551"},
+                 new Users() { Id = 4, FirstName = "John", LastName = "Doe", Email = "johndoe@gmail.com", PhoneNumber = "555-1234"},
+                 new Users() { Id = 5, FirstName = "Jane", LastName = "Doe", Email = "janedoe@yahoo.com", PhoneNumber = "555-5678" }
+             };
+             var userViewModel = _mapper.Map<List<UserViewModel>>(user);*/
+            // Map Single object
+            var user = new Users() { Id = 1, FirstName = "Saleem", LastName = "khan", Email = "saleem@yopmail.com", PhoneNumber = "03156446551" };
+            var userViewModel = _mapper.Map<UserViewModel>(user);
+            return View(userViewModel);
+        }
+
         public async Task<IActionResult> UserList()
         {
             List<User> users = await _appDbContext.Users.ToListAsync();
             List<UsersDetail> usersDetail = await _appDbContext.UsersDetails.ToListAsync();
             var userVMs = from u in users
-                                   join ud in usersDetail
-                                   on u.Id equals ud.UserId
-                                   select new UserVM
-                                   {
-                                       Id = u.Id,
-                                       Name = u.Name,
-                                       Email = u.Email,
-                                       Address = ud.Address,
-                                       City = ud.City,
-                                       PhoneNumber = ud.PhoneNumber,
+                          join ud in usersDetail
+                          on u.Id equals ud.UserId
+                          select new UserVM
+                          {
+                              Id = u.Id,
+                              Name = u.Name,
+                              Email = u.Email,
+                              Address = ud.Address,
+                              City = ud.City,
+                              PhoneNumber = ud.PhoneNumber,
 
-                                   };
-                                  
+                          };
+
             return View(userVMs);
         }
         public IActionResult Privacy()
@@ -53,7 +74,7 @@ namespace MvcWebApp.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            if(id == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -67,7 +88,7 @@ namespace MvcWebApp.Controllers
                 PhoneNumber = userExist.UsersDetails.FirstOrDefault().PhoneNumber,
 
             };
-            if(userDetail == null)
+            if (userDetail == null)
             {
                 return NotFound();
             }
